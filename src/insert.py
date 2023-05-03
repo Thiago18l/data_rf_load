@@ -1,4 +1,3 @@
-import collections
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, String, String, Date
@@ -115,7 +114,7 @@ for csv_file in csv_files:
         # Pule o cabeçalho
         next(reader)
         
-        chunk_size = 10000
+        chunk_size = 50000
         chunk_count = 0
         while True:
             rows = []
@@ -127,21 +126,9 @@ for csv_file in csv_files:
             # Verifique se há mais linhas para serem processadas
             if not rows:
                 break
-            
-        rows = [convert_row_to_dict(row) for row in rows]
-        print(rows)
-        for row in rows:
-            ordered_row = collections.OrderedDict()
-            ordered_row['id'] = None
-            for key, value in row.items():
-                ordered_row[key] = value
-                row.clear()
-                row.update(ordered_row)
-            conflict_target = ['taxpayerRegistry']
-            print(rows)
-            conflict_action = insert(Establishment).on_conflict_do_nothing(index_elements=conflict_target)
-            compiled = conflict_action.compile(dialect=session.bind.dialect)
-            session.bulk_insert_mappings(Establishment, rows, render_nulls=True, **compiled.construct_params())
+            rows = [convert_row_to_dict(row) for row in rows]
+
+            session.bulk_insert_mappings(Establishment, rows, render_nulls=True)
 
             session.commit()
             chunk_count += 1
