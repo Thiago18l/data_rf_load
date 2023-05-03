@@ -27,7 +27,7 @@ Base = declarative_base()
 
 # Define a classe que representa a tabela "establishments"
 class Establishment(Base):
-    __tablename__ = 'establishments'
+    __tablename__ = 'establishment'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     taxpayerRegistry = Column(String)
