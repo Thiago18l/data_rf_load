@@ -70,6 +70,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 pd.options.mode.chained_assignment = None  # default='warn'
 pd.options.mode.use_inf_as_na = True  # default=False
+keep_values = ['NULL']
 
 def convert_row_to_dict(row):
     return {
@@ -180,7 +181,8 @@ for csv_file in csv_files:
     chunk_size = 50000
 
     # Cria uma instância do DataFrameReader
-    reader = pd.read_csv(csv_file, sep=';', header=None, chunksize=chunk_size, on_bad_lines='skip', dtype=dtypes, na_filter=False, keep_default_na=False, low_memory=False)
+    reader = pd.read_csv(csv_file, sep=';', header=None, chunksize=chunk_size, on_bad_lines='skip', dtype=dtypes, 
+                         na_values=['NULL', " "], keep_default_na=False, low_memory=False)
 
     # Cria uma sessão com o banco de dados
     session = Session()
