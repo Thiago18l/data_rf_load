@@ -1,14 +1,14 @@
+import psycopg2
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, String, String, Date
 import csv
-from sqlalchemy import create_engine, Column, String, String, Date
+from sqlalchemy import create_engine, Column, String, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import uuid
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects.postgresql import UUID
-
+import _csv
+import chardet
 # Conexão com o banco de dados
 
 host = "localhost",
@@ -25,6 +25,8 @@ csv_files = [f"{path}/K3241.K03200Y2.D30408.csv"]
 Base = declarative_base()
 
 # Define a classe que representa a tabela "establishments"
+
+
 class Establishment(Base):
     __tablename__ = 'establishment'
 
@@ -62,7 +64,8 @@ class Establishment(Base):
 
 
 # Cria uma engine para conectar ao banco de dados
-engine = create_engine(f'postgresql://starship_user:starship_password@0.0.0.0:{port}/starship')
+engine = create_engine(
+    f'postgresql://starship_user:starship_password@0.0.0.0:{port}/starship')
 print(engine)
 # Cria uma sessão para interagir com o banco de dados
 Session = sessionmaker(bind=engine)
@@ -112,27 +115,44 @@ for csv_file in csv_files:
 
         # Pule o cabeçalho
         next(reader)
-        
+
         chunk_size = 50000
         chunk_count = 0
         while True:
             rows = []
             for idx, row in enumerate(reader):
-                if idx >= chunk_size:
-                    break
-                rows.append(tuple(field.replace('"', '') for field in row))
+                if ('NUL' in row):
+                    print(f"AQUI {idx + 1}")
+                if '\0' in ''.join(row):
+                    print("ENTREI")
+                    print(f"Ignorando linha {idx + 1} com erro de decodificação")
+                    continue
+                try:
+                    if idx >= chunk_size:
+                        break
+                    rows.append(tuple(field.replace('"', '') for field in row))
+                except _csv.Error:
+                    print(
+                        f"Ignorando linha {idx + 1} com erro de decodificação")
+                    continue
 
             # Verifique se há mais linhas para serem processadas
             if not rows:
                 break
             rows = [convert_row_to_dict(row) for row in rows]
 
-            session.bulk_insert_mappings(Establishment, rows, render_nulls=True)
-
-            session.commit()
-            chunk_count += 1
-            del rows
-            print(f"{chunk_count} Chunk Processadas")
+            try:
+                session.bulk_insert_mappings(
+                    Establishment, rows, render_nulls=True)
+                session.commit()
+                chunk_count += 1
+                print(f"{chunk_count} Chunk Processadas")
+            except psycopg2.errors.UniqueViolation as e:
+                print(f"Chave única duplicada: {e}")
+                session.rollback()
+                continue
+            finally:
+                del rows
 
 
 # Fechar a conexão com o banco de dados
