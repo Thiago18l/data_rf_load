@@ -1,14 +1,12 @@
 import psycopg2
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import csv
 from sqlalchemy import create_engine, Column, String, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
-import _csv
-import chardet
+import pandas as pd
 # Conexão com o banco de dados
 
 host = "localhost",
@@ -70,7 +68,8 @@ print(engine)
 # Cria uma sessão para interagir com o banco de dados
 Session = sessionmaker(bind=engine)
 session = Session()
-
+pd.options.mode.chained_assignment = None  # default='warn'
+pd.options.mode.use_inf_as_na = True  # default=False
 
 def convert_row_to_dict(row):
     return {
@@ -106,53 +105,103 @@ def convert_row_to_dict(row):
         'dateSpecialSituation': row[29].replace('"', '') if len(row) > 29 else ''
     }
 
+chunk_size = 50000
+chunk_count = 0
+dtypes = {
+    'taxpayerRegistry': 'object',
+    'cnpjOrder': 'object',
+    'cnpjDv': 'object',
+    'branchIdentifier': 'object',
+    'fantasyName': 'object',
+    'cadastralSituation': 'object',
+    'dateCadastralSituation': 'object',
+    'reasonCadastralSituation': 'object',
+    'outsideCityName': 'object',
+    'country': 'object',
+    'startDateActivity': 'object',
+    'principalCNAEFiscal': 'object',
+    'secondaryCNAEFiscal': 'object',
+    'typeOfStreet': 'object',
+    'street': 'object',
+    'number': 'object',
+    'complement': 'object',
+    'neighborhood': 'object',
+    'cep': 'object',
+    'UF': 'object',
+    'city': 'object',
+    'ddd1': 'object',
+    'phone1': 'object',
+    'ddd2': 'object',
+    'phone2': 'object',
+    'faxDDD': 'object',
+    'fax': 'object',
+    'email': 'object',
+    'especialSituation': 'object',
+    'dateSpecialSituation': 'object'
+}
+
+
+mapping = {
+    0: 'taxpayerRegistry',
+    1: 'cnpjOrder',
+    2: 'cnpjDv',
+    3: 'branchIdentifier',
+    4: 'fantasyName',
+    5: 'cadastralSituation',
+    6: 'dateCadastralSituation',
+    7: 'reasonCadastralSituation',
+    8: 'outsideCityName',
+    9: 'country',
+    10: 'startDateActivity',
+    11: 'principalCNAEFiscal',
+    12: 'secondaryCNAEFiscal',
+    13: 'typeOfStreet',
+    14: 'street',
+    15: 'number',
+    16: 'complement',
+    17: 'neighborhood',
+    18: 'cep',
+    19: 'UF',
+    20: 'city',
+    21: 'ddd1',
+    22: 'phone1',
+    23: 'ddd2',
+    24: 'phone2',
+    25: 'faxDDD',
+    26: 'fax',
+    27: 'email',
+    28: 'especialSituation',
+    29: 'dateSpecialSituation'
+}
 
 # Loop over CSV files
 for csv_file in csv_files:
-    # Abra o arquivo CSV
-    with open(csv_file, 'r', encoding="latin1") as file:
-        reader = csv.reader(file, delimiter=';')
+    # Define o tamanho do chunk
+    chunk_size = 50000
 
-        # Pule o cabeçalho
-        next(reader)
+    # Cria uma instância do DataFrameReader
+    reader = pd.read_csv(csv_file, sep=';', header=None, chunksize=chunk_size, on_bad_lines='skip', dtype=dtypes, na_filter=False, keep_default_na=False, low_memory=False)
 
-        chunk_size = 50000
-        chunk_count = 0
-        while True:
-            rows = []
-            for idx, row in enumerate(reader):
-                if ('NUL' in row):
-                    print(f"AQUI {idx + 1}")
-                if '\0' in ''.join(row):
-                    print("ENTREI")
-                    print(f"Ignorando linha {idx + 1} com erro de decodificação")
-                    continue
-                try:
-                    if idx >= chunk_size:
-                        break
-                    rows.append(tuple(field.replace('"', '') for field in row))
-                except _csv.Error:
-                    print(
-                        f"Ignorando linha {idx + 1} com erro de decodificação")
-                    continue
+    # Cria uma sessão com o banco de dados
+    session = Session()
 
-            # Verifique se há mais linhas para serem processadas
-            if not rows:
-                break
-            rows = [convert_row_to_dict(row) for row in rows]
+    # Define o número de chunks processados
+    chunk_count = 0
 
-            try:
-                session.bulk_insert_mappings(
-                    Establishment, rows, render_nulls=True)
-                session.commit()
-                chunk_count += 1
-                print(f"{chunk_count} Chunk Processadas")
-            except psycopg2.errors.UniqueViolation as e:
-                print(f"Chave única duplicada: {e}")
-                session.rollback()
-                continue
-            finally:
-                del rows
+    # Itera sobre os chunks do arquivo
+    for chunk in reader:
+        chunk = chunk.rename(columns=mapping)
+        # Converte o chunk do DataFrame em uma lista de dicionários
+        records = chunk.to_dict('records')
 
+        # Insere os registros no banco de dados em lotes
+        try:
+            session.bulk_insert_mappings(Establishment, records, render_nulls=True)
+            session.commit()
+            chunk_count += 1
+            print(f"{chunk_count} Chunk Processadas")
+        except psycopg2.IntegrityError as e:
+            print(f"Erro de integridade: {e}")
+            session.rollback()
 
 # Fechar a conexão com o banco de dados
