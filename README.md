@@ -4,11 +4,25 @@
 
 1. Clone o repositório:
 ```bash
-    git clone git@github.com:TechPayment/load_data_rf.git
+git clone git@github.com:TechPayment/load_data_rf.git
 ```
 
 
-2. Instale as dependências do projeto:
+### 2. Instale as dependências do projeto:
+- Crie um virtualenv 
+    ```bash
+    python -m venv venv
+    ```
+- Ative o virtualenv
+    ```bash
+    source venv/bin/activate
+    ```
+    Caso seja ambiente Windows:
+    ```bash
+    venv\Scripts\activate
+    ```
+
+- Siga para a instalação dos requirements:
 
 ```bash
     pip install -r requirements.txt
@@ -58,4 +72,4 @@ O projeto utiliza as seguintes tecnologias:
 - SQLAlchemy
 - Pandas
 
-Caso haja algum problema na execução do projeto, entre em contato com o desenvolvedor pelo email cto@techpaynmentbrazi.com.br.
+Caso haja algum problema na execução do projeto, entre em contato com o desenvolvedor pelo email cto@techpaynmentbrazil.com.br.
