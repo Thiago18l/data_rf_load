@@ -43,6 +43,22 @@ def get_columns(class_name: str) -> dict:
             5: 'sizeCompany',
             6: 'responsibleEntityFederative'
         },
+        'Lucro': {
+            0: 'cnpj',
+            1: 'year',
+            2: 'cnpjSCP',
+            3: 'formTaxation',
+            4: 'amountScriptures',
+        },
+        'Simples': {
+            0: 'cnpj',
+            1: 'simplesOption',
+            2: 'dateSimplesOption',
+            3: 'dateExclusionSimplesOption',
+            4: 'optionMei',
+            5: 'dateOptionMei',
+            6: 'dateExclusionOptionMei'
+        },
         'Partner': {
             0: 'cnpjBasic',
             1: 'partnerIdentifier',
@@ -109,6 +125,22 @@ def get_dtypes(class_name: str) -> dict:
             'procuratorQualification': 'object',
             'ageGroup': 'object',
         },
+        'Lucro': {
+            'cnpj': 'object',
+            'year': 'object',
+            'cnpjSCP': 'object',
+            'formTaxation': 'object',
+            'amountScriptures': 'object',
+        },
+        'Simples': {
+            'cnpj': 'object',
+            'simplesOption': 'object',
+            'dateSimplesOption': 'object',
+            'dateExclusionSimplesOption': 'object',
+            'optionMei': 'object',
+            'dateOptionMei': 'object',
+            'dateExclusionOptionMei': 'object'
+        },
         'Establishment': {
             'taxpayerRegistry': 'object',
             'cnpjOrder': 'object',
@@ -164,36 +196,3 @@ def get_dtypes(class_name: str) -> dict:
     }
     return dtypes_map.get(class_name, {})
 
-
-dtypes = {
-    'taxpayerRegistry': 'object',
-    'cnpjOrder': 'object',
-    'cnpjDv': 'object',
-    'branchIdentifier': 'object',
-    'fantasyName': 'object',
-    'cadastralSituation': 'object',
-    'dateCadastralSituation': 'object',
-    'reasonCadastralSituation': 'object',
-    'outsideCityName': 'object',
-    'country': 'object',
-    'startDateActivity': 'object',
-    'principalCNAEFiscal': 'object',
-    'secondaryCNAEFiscal': 'object',
-    'typeOfStreet': 'object',
-    'street': 'object',
-    'number': 'object',
-    'complement': 'object',
-    'neighborhood': 'object',
-    'cep': 'object',
-    'UF': 'object',
-    'city': 'object',
-    'ddd1': 'object',
-    'phone1': 'object',
-    'ddd2': 'object',
-    'phone2': 'object',
-    'faxDDD': 'object',
-    'fax': 'object',
-    'email': 'object',
-    'especialSituation': 'object',
-    'dateSpecialSituation': 'object'
-}

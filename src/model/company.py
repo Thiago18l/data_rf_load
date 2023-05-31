@@ -12,11 +12,10 @@ class Company(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     taxpayerRegistry = Column(String, unique=True, nullable=True)
     businessName = Column(String, unique=True, nullable=True)
-    legalNature = Column(String, unique=True, nullable=True)
+    legalNature = Column(String, nullable=True)
     responsibleQualification = Column(String, unique=True, nullable=True)
     capitalCompany = Column(String, unique=True, nullable=True)
     sizeCompany = Column(String, unique=True, nullable=True)
     responsibleEntityFederative = Column(String, unique=True, nullable=True)
 
-    __table_args__ = (UniqueConstraint('taxpayerRegistry'), UniqueConstraint('businessName'), UniqueConstraint('legalNature'), UniqueConstraint(
-        'responsibleQualification'), UniqueConstraint('capitalCompany'), UniqueConstraint('sizeCompany'), UniqueConstraint('responsibleEntityFederative'), {})
+    __table_args__ = (UniqueConstraint('taxpayerRegistry'), {})

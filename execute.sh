@@ -5,7 +5,7 @@ CLASS=$1
 # Exporta as variáveis de ambiente
 export DATABASE_URL="postgres://starship_user:starship_password@localhost/starship"
 export DEBUG=True
-export PATH_FILES="/mnt/c/Users/Thiago/Downloads/DADOS RECEITA/Estabelecimentos"
+export PATH_FILES="/home/lionheart/dev/dados_receita/Simples/"
 
 # Executa o programa Python
 run $CLASS

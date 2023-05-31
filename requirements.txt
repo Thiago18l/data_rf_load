@@ -1,7 +1,5 @@
 autopep8==2.0.2
 greenlet==2.0.2
-# Editable Git install with no remote (insert-database==0.1)
--e /home/lionheart/dev/python_insert_db
 numpy==1.24.3
 pandas==2.0.1
 psycopg2==2.9.6

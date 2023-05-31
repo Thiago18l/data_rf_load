@@ -15,13 +15,16 @@ def run(csv_files: list, class_name: str, session):
     # Importar a classe dinamicamente
     module = importlib.import_module(module_path)
     class_obj = getattr(module, class_name)
-    dtype = utils.get_dtypes(class_name)
     columns = utils.get_columns(class_name)
     
     for csv_file in csv_files:
-
-        # Cria uma instância do DataFrameReader
-        reader = pd.read_csv(csv_file, sep=';', header=None, chunksize=CHUNK_SIZE, on_bad_lines='skip', dtype=dtype, 
+        print(class_name)
+        if class_name == 'Lucro':
+            reader = pd.read_csv(csv_file, sep=',', header=None, chunksize=CHUNK_SIZE, on_bad_lines='skip', dtype=str, 
+                            na_values=['NULL', " "], keep_default_na=False, low_memory=False, encoding='latin1')
+        else:
+            # Cria uma instância do DataFrameReader
+            reader = pd.read_csv(csv_file, sep=';', header=None, chunksize=CHUNK_SIZE, on_bad_lines='skip', dtype=str, 
                             na_values=['NULL', " "], keep_default_na=False, low_memory=False, encoding='latin1')
 
 
@@ -33,7 +36,6 @@ def run(csv_files: list, class_name: str, session):
             chunk = chunk.rename(columns=columns)
             # Converte o chunk do DataFrame em uma lista de dicionários
             records = chunk.to_dict('records')
-
             # Insere os registros no banco de dados em lotes
             try:
                 session.bulk_insert_mappings(class_obj, records, render_nulls=True)
