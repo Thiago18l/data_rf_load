@@ -52,6 +52,7 @@ def run(csv_files: list, class_name: str, session):
                     logging.info(f"{chunk_count} Chunk Processadas com sucesso")
             except exc.IntegrityError as e:
                 count += 1
+                logging.debug(e)
                 logging.error(f"A chunk {count} foi pulada por já existir no banco")
                 session.rollback()
                 continue
