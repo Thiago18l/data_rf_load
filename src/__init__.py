@@ -9,7 +9,6 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(BASE_DIR, '.env'), verbose=True)
 
 database_url = os.getenv('DATABASE_URL')
-debug = os.getenv('DEBUG') == 'True'
 path_files = os.getenv('PATH_FILES')
 
 def main():
