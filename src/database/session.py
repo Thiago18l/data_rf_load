@@ -12,6 +12,6 @@ def get_session() -> Session:
         'postgresql://',
         1
     )
-    engine = create_engine(URL)
+    engine = create_engine(URL, connect_args={'sslmode': 'require', 'sslrootcert': None})
     Session = sessionmaker(bind=engine)
     return Session()
